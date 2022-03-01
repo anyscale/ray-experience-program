@@ -7,7 +7,8 @@ See `requirements.txt`
 ## Task Assets
 In `assets/ray_version.py`, you can download task assets.
 
-## How to measure if the task is completed successfully?
+## Measrue success
+How to judge if the task is completed successfully or not?
 
 ## Answers
 In `answers/ray_version.py`, you can find the Ray version.
