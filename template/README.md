@@ -5,5 +5,5 @@ Parallelize a simple Python Program
 See `requirements.txt`
 
 ## Versions
-
+In `assets/ray_version.py`, you can download test assets.
 In `answers/ray_version.py`, you can find the Ray version.
