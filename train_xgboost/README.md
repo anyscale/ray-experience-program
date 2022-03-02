@@ -1,5 +1,5 @@
 ## Task Description
-Train an xgboost model in a distributed fashion using xgboost-ray.
+Modify the xgboost code to run in a distributed fashion using xgboost-ray.
 
 ## Environment
 See `requirements.txt`

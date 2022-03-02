@@ -3,7 +3,7 @@ import time
 
 from xgboost import DMatrix, train
 
-# XGBoost config.
+# Define XGBoost training parameters
 xgboost_params = {
     "tree_method": "approx",
     "objective": "binary:logistic",
@@ -16,15 +16,17 @@ def train_xgboost(
 ):
     start_time = time.time()
 
+    # Split data into train and test
     X_train = data.sample(frac=1 - test_fraction)
     X_valid = data.drop(X_train.index)
 
+    # Pass Pandas dataframe to DMatrix
     train_set = DMatrix(X_train.drop(target_column, axis=1), X_train[target_column])
     test_set = DMatrix(X_valid.drop(target_column, axis=1), X_valid[target_column])
 
     evals_result = {}
 
-    # Train the classifier
+    # Run the training
     bst = train(
         params=config,
         dtrain=train_set,
@@ -35,6 +37,7 @@ def train_xgboost(
     )
     print(f"Total time taken: {time.time()-start_time}")
 
+    # Get a model back
     model_path = "model.xgb"
     bst.save_model(model_path)
     print("Final validation error: {:.4f}".format(evals_result["eval"]["error"][-1]))
