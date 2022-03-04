@@ -53,11 +53,11 @@ def train_xgboost_ray(
 
 
 data = ray.data.read_parquet(
-    "s3://anyscale-demo/data/classification.parquet/partition=0/part_0.parquet"
+    "../data"
 )
 bst = train_xgboost_ray(
     xgboost_params,
     data,
-    "labels",
+    "label",
     RayParams(num_actors=4, cpus_per_actor=1)  # Define RayParams (number of workers etc.)
 )

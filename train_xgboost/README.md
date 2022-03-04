@@ -5,7 +5,7 @@ Modify the xgboost code to run in a distributed fashion using xgboost-ray.
 See `requirements.txt`
 
 ## Task Assets
-Dummy dataset - `s3://anyscale-demo/data/classification.parquet/partition=0/part_0.parquet`
+Dummy parquet dataset located in `./data` directory
 
 ## Measrue success
 An xgboost Booster object is obtained.

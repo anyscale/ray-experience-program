@@ -46,10 +46,10 @@ def train_xgboost(
 
 
 data = pd.read_parquet(
-    "s3://anyscale-demo/data/classification.parquet/partition=0/part_0.parquet"
+    "./data"
 )
 bst = train_xgboost(
     xgboost_params,
     data,
-    "labels",
+    "label",
 )
