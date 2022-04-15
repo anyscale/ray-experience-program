@@ -1,0 +1,5 @@
+ray[serve]
+torch
+torchvision
+requests
+pillow
