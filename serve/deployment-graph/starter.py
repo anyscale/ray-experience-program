@@ -61,6 +61,32 @@ class ImageClassifier:
         }
 
 
+# Python classes for upcoming tasks!
+
+# class ContentInput(BaseModel):
+#     image_url: str
+#     user_id: int
+
+
+# @serve.deployment
+# def downloader(inp: "ContentInput"):
+#     """Download HTTP content, in production this can be business logic downloading from other services"""
+#     image_bytes = requests.get(inp.image_url).content
+#     return image_bytes
+
+
+# class ImageDetector:
+#     def __init__(self):
+#         self.model = models.detection.maskrcnn_resnet50_fpn(pretrained=True).eval()
+
+#     def forward(self, input_tensor):
+#         with torch.no_grad():
+#             return [
+#                 (o["labels"].numpy().tolist(), o["boxes"].numpy().tolist())
+#                 for o in self.model(input_tensor)
+#             ]
+
+
 # Let's Build the DAG here !!
 preprocessor = Preprocessor.bind()
 classifier = ImageClassifier.bind()
