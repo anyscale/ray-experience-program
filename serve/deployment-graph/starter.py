@@ -68,7 +68,6 @@ class ImageClassifier:
 #     user_id: int
 
 
-# @serve.deployment
 # def downloader(inp: "ContentInput"):
 #     """Download HTTP content, in production this can be business logic downloading from other services"""
 #     image_bytes = requests.get(inp.image_url).content
