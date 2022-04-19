@@ -1,4 +1,5 @@
 from io import BytesIO
+from typing import Dict
 from pydantic import BaseModel
 from pprint import pprint
 
@@ -63,32 +64,55 @@ class ImageClassifier:
 
 # Python classes for upcoming tasks!
 
-# class ContentInput(BaseModel):
-#     image_url: str
-#     user_id: int
+
+class ContentInput(BaseModel):
+    image_url: str
+    user_id: int
 
 
-# def downloader(inp: "ContentInput"):
-#     """Download HTTP content, in production this can be business logic downloading from other services"""
-#     image_bytes = requests.get(inp.image_url).content
-#     return image_bytes
+# ContentInput({"image_url": ...})
 
 
-# class ImageDetector:
-#     def __init__(self):
-#         self.model = models.detection.maskrcnn_resnet50_fpn(pretrained=True).eval()
+@serve.deployment
+def downloader(inp: "ContentInput"):
+    """Download HTTP content, in production this can be business logic downloading from other services"""
+    image_bytes = requests.get(inp.image_url).content
+    path = "/tmp/output_serve.jpeg"
+    f = open(path, "wb")
+    f.write(image_bytes)
+    f.close()
+    # return image_bytes
+    return path
 
-#     def forward(self, input_tensor):
-#         with torch.no_grad():
-#             return [
-#                 (o["labels"].numpy().tolist(), o["boxes"].numpy().tolist())
-#                 for o in self.model(input_tensor)
-#             ]
+
+@serve.deployment
+class ImageDetector:
+    def __init__(self):
+        self.model = models.detection.maskrcnn_resnet50_fpn(pretrained=True).eval()
+
+    def forward(self, input_tensor):
+        with torch.no_grad():
+            return [
+                (o["labels"].numpy().tolist(), o["boxes"].numpy().tolist())
+                for o in self.model(input_tensor)
+            ]
+
+
+@serve.deployment
+class Combiner:
+    def combine(self, object_list, classify_dict):
+        return {"object_list": object_list, "classify_dict": classify_dict}
 
 
 # Let's Build the DAG here !!
 preprocessor = Preprocessor.bind()
 classifier = ImageClassifier.bind()
+detector = ImageDetector.bind()
+combiner = Combiner.bind()
+
+
+def input_adapter_2(input_json: Dict):
+    return ContentInput.parse_obj(input_json)
 
 
 def input_adapter(path: str):
@@ -96,16 +120,23 @@ def input_adapter(path: str):
 
 
 with InputNode() as user_input:
-    image_tensor = preprocessor.preprocess.bind(user_input)
-    local_dag = classifier.forward.bind(image_tensor)
+    image_bytes = downloader.bind(user_input)
+    image_tensor = preprocessor.preprocess.bind(image_bytes)
+    classify_dict = classifier.forward.bind(
+        image_tensor
+    )  # why is this called local_dag and not output_dict?
+    object_list = detector.forward.bind(image_tensor)
+    local_dag = combiner.combine.bind(object_list, classify_dict)
 
-    serve_entrypoint = DAGDriver.bind(local_dag, input_schema="starter.input_adapter")
+    serve_entrypoint = DAGDriver.bind(
+        local_dag, input_schema="starter.input_adapter_2"
+    )  # why does the output go in the first argument here?
 
 if __name__ == "__main__":
     print("Started running DAG locally...")
-    # url = "https://github.com/EliSchwartz/imagenet-sample-images/blob/master/n01833805_hummingbird.JPEG?raw=true"
-    path = "hummingbird.jpeg"
-    rst = ray.get(local_dag.execute(path))
+    url = "https://github.com/EliSchwartz/imagenet-sample-images/blob/master/n01833805_hummingbird.JPEG?raw=true"
+    # path = "hummingbird.jpeg"
+    rst = ray.get(local_dag.execute({"image_url": url, "user_id": 234}))
     pprint(rst)
 
 # run `serve run starter.serve_entrypoint`
