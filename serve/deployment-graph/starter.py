@@ -33,6 +33,7 @@ class Preprocessor:
         )
 
     def preprocess(self, image_path: str) -> np.ndarray:
+        # pil_image = Image.open(BytesIO(image_payload_bytes)).convert("RGB")
         pil_image = Image.open(image_path).convert("RGB")
         input_array = self.preprocessor(pil_image).unsqueeze(0)
         return input_array
@@ -102,11 +103,17 @@ with InputNode() as user_input:
     serve_entrypoint = DAGDriver.bind(local_dag, input_schema="starter.input_adapter")
 
 if __name__ == "__main__":
-    print("Started running DAG locally...")
+    print("Started running DAG in python with Ray Core locally...")
     # url = "https://github.com/EliSchwartz/imagenet-sample-images/blob/master/n01833805_hummingbird.JPEG?raw=true"
     path = "hummingbird.jpeg"
     rst = ray.get(local_dag.execute(path))
     pprint(rst)
 
-# run `serve run starter.serve_entrypoint`
+# CLIs to deploy the DAG with ray serve and test http
+# run `serve run starter:serve_entrypoint`
 # run `curl localhost:8000/\?path=hummingbird.jpeg``
+
+# HTTP request With image URL
+# curl -X 'GET' \
+#   'http://localhost:8000/?image_url=https%3A%2F%2Fgithub.com%2FEliSchwartz%2Fimagenet-sample-images%2Fblob%2Fmaster%2Fn01833805_hummingbird.JPEG%3Fraw%3Dtrue&user_id=1' \
+#   -H 'accept: application/json'
